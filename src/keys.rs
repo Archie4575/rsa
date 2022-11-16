@@ -194,7 +194,7 @@ impl KeyPair {
         let n: u64 = q * p; 
         let m: u64 = (p -1) * (q -1);
         let d = self.ext_gcd(e, m);
-        println!("\nKeyPair Length: {}\nKey Len: {}\n", k*2, k);
+        println!("\nKeyPair Length: {}\nKey Len: {}", k*2, k);
         println!("\nCalculated Exponents:\np: {}\nq: {}\nd: {}\ne: {}\nm: {}\nn: {}\n", p, q, d, e, m, n);
         (d, e, m, n)
     }
@@ -259,7 +259,6 @@ impl KeyPair {
         let mut x: i64;
         let mut prime: bool;
 
-        println!("n: {}", n);
         if n < 6 {
             return [false, false, true, true, false, true] [u];
         }
@@ -275,7 +274,6 @@ impl KeyPair {
         
         for _ in 0..min(n-4, k) {
             let a = thread_rng().gen_range(2..min(n - 2, i64::MAX));
-            println!("\na:{} d: {}", a, d);
             x = self.mod_pow(a, d, n);
             
             if x == 1 && x == r {
