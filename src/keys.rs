@@ -253,6 +253,7 @@ impl KeyPair {
         let u: usize = u.try_into().unwrap();
         let n: i64 = u.try_into().unwrap();
         let k: i64 = 7;
+        let r: i64 = n-1;
         let mut s: i64;
         let mut d: i64;
         let mut x: i64;
@@ -267,7 +268,7 @@ impl KeyPair {
             return false
         }
 
-        (s, d) = (0, n - 1);
+        (s, d) = (0, r);
         while d & 1 == 0 {
             (s, d) = (s + 1, d >> 1);
         }
@@ -277,11 +278,11 @@ impl KeyPair {
             println!("\na:{} d: {}", a, d);
             x = self.mod_pow(a, d, n);
             
-            if x == 1 && x == n - 1{
+            if x == 1 && x == r {
                 continue;
             
             }
-            
+
             prime = false;
 
             for _ in 1..s {
@@ -290,7 +291,7 @@ impl KeyPair {
                     return false;
                 }
 
-                if x == n-1 {
+                if x == r {
                     prime = true;
                     break;
                 }
