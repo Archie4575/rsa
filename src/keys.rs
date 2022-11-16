@@ -212,12 +212,10 @@ impl KeyPair {
             let shift_b: u32 = k - 1;
             let mut p: [u64;2] = [0,0];
             let mut n: u64;
-            let mut prime: bool;
-        
-            for mut i in 0..2 {
+            let mut i: usize = 0;
+            while  i < 2 {
                 n = thread_rng().gen_range(min..max);
                 n|= (min >> (shift_b))^min;
-                prime = false;
     
                 loop {
                     n+=2;
@@ -229,14 +227,11 @@ impl KeyPair {
                         continue;
                     }
     
-                    if n % e != 1 {
+                    if n % e != 1   {
                         p[i] = n;
-                        prime = true;
+                        i = i+1;
                         break;
                     }
-                }
-                if !prime {
-                    i-=1;
                 }
             } 
             (p[0], p[1])
