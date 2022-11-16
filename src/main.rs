@@ -1,6 +1,8 @@
 pub mod keys;
+pub mod keys_math;
 use crate::keys::{KeyPair, Key};
 use std::io::{self, Write, BufRead};
+
 
 fn main() {
     let pair = KeyPair::new(&32);
