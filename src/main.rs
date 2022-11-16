@@ -3,7 +3,7 @@ use crate::keys::{KeyPair, Key};
 use std::io::{self, Write, BufRead};
 
 fn main() {
-    let pair = KeyPair::new();
+    let pair = KeyPair::new().generate(&32);
     
     // Test number below 3233
     let mut hex: u64 = 0x00000C9F;
@@ -35,7 +35,7 @@ fn main() {
     }
 
     // Test reading key from file
-    let key_from_file: Key = Key::from_file("rsa.pub");
+    let key_from_file: Key = Key::from_file("rsa.pem");
 
     // Test decryption
     println!("Decrypting result...");

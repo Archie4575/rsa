@@ -5,6 +5,7 @@
 
 extern crate base64;
 use base64::{encode, decode};
+use core::panic;
 use std::io::{Write, Read};
 use std::fs::{File};
 use rand::Rng;
@@ -181,28 +182,30 @@ impl KeyPair {
 
     }
 
-    pub fn generate(&self) -> Self {
-        let (d, e, _m, n) = self.calc_exponents();
-        KeyPair {skey: Key { n, exp: e}, pkey: Key {n, exp: d}}
+    pub fn generate(&self, k: &u32) -> Self {
+        let (d, e, _m, n) = self.calc_exponents(k);
+        KeyPair {skey: Key { n, exp: d}, pkey: Key {n, exp: e}}
     }
 
-    fn calc_exponents(&self) -> (u64, u64, u64, u64) {
+    fn calc_exponents(&self, k: &u32) -> (u64, u64, u64, u64) {
         //print!("Calculating Exponents of KeyPair...");
-        let (p, q) = (self.rand_prime(), self.rand_prime());
-        let n: u64 = q * p;
-        let m: u64 = (q -1) * (p -1);
-        let e: u64 = self.find_e(m);
+        let e: u64 = self.rand_e();
+        let (p, q) = self.rand_pq(*k, e);
+        let n: u64 = q * p; 
+        let m: u64 = (p -1) * (q -1);
         let d = self.ext_gcd(e, m);
-        println!("\nCalculated Exponents:\nd: {}\ne: {}\nm: {}\nn: {}", d, e, m, n);
+        println!("\nKeyPair Length: {}\nKey Len: {}\n", k*2, k);
+        println!("\nCalculated Exponents:\np: {}\nq: {}\nd: {}\ne: {}\nm: {}\nn: {}\n", p, q, d, e, m, n);
         (d, e, m, n)
     }
 
+
     fn ext_gcd(&self, a: u64, b: u64) -> u64 {
-        let (mut a, mut b) = (i64::try_from(a).unwrap(), i64::try_from(b).unwrap());
-        let mut x: [i64; 2] = [0, 1];
-        let mut y: [i64; 2] = [1, 0];
-        let mut q: i64;
-        let  old_b: i64 = b;    
+        let (mut a, mut b) = (i128::try_from(a).unwrap(), i128::try_from(b).unwrap());
+        let mut x: [i128; 2] = [0, 1];
+        let mut y: [i128; 2] = [1, 0];
+        let mut q: i128;
+        let  old_b: i128 = b;    
 
         while a != 0 {
             ((q, a), b) = ((b / a, b % a), a);
@@ -218,24 +221,36 @@ impl KeyPair {
         u64::try_from(x[0]).unwrap()
     }
 
-    fn rand_prime(&self) -> u64 {
-        let mut u:u64 = 0;
-        let mut n: u64;
-
-        while !self.is_prime(u) {
-            u = rand::thread_rng().gen_range(1000..3000);
+    fn rand_pq(&self, mut k: u32, e: u64) -> (u64, u64) {
+        if k > 32 {
+            panic!("Key Bit-Length is too long, must be <=32")
         }
-        
-        for i in (2..1000).step_by(2) {
-            n = i* u + 1;
-            if self.is_prime(n) {
-                return n;
-            }
-        }
-        panic!("RandPrime: Iteration has reached limit!!")
+        k = k/2;
+        let max: u64 = u64::try_from(2_u128.pow(k) - 1).unwrap();
+        let min: u64 = (max >> 1)^max;
+        let mut p: [u64;2] = [0,0];
+    
+        for n in 0..2{
+            p[n] = rand::thread_rng().gen_range(min..max);
+            loop {
+                if !self.is_prime(p[n]) {
+                    if p[n] & 1 == 0 {
+                        p[n]+=1;
+                        continue;
+                    }
+                    p[n]+=2;
+                    continue;
+                }
+                if p[n] % e != 1 {
+                    break;
+                }
+                p[n]+=2;
+            }  
+        } 
+        (p[0], p[1])
     }
     
-    fn is_prime(&self, n: u64) -> bool {
+    fn is_prime(&self, n:u64) -> bool {
         if n == 2 || n == 3 {
             return true;
         }
@@ -252,33 +267,13 @@ impl KeyPair {
         return true;
     }
 
-    fn gcd(&self, first: u64, second: u64) -> u64 {
-        let mut max = first;
-        let mut min = second;
-        if min > max {
-            let val = max;
-            max = min;
-            min = val;
-        }
-    
-        loop {
-            let res = max % min;
-            if res == 0 {
-                return min;
-            }
-    
-            max = min;
-            min = res;
-        }
-    }
-        
-
-    fn find_e(&self, m: u64) -> u64 {
-        // let e: Vec<u64> = range(2, m);
-        for n in 2..m {
-            if self.gcd(n, m) == 1 {
-                return n;
-            }
+    fn rand_e(&self) -> u64 {
+        let e: u64;
+        let p: [u64; 5] = [3, 5, 17, 257, 65537];
+ 
+        for _n in 0..4 {
+            e = p[rand::thread_rng().gen_range(0..4)];
+            return e;
         }
         panic!("Can't Find E!!");
     }
