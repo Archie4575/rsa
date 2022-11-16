@@ -8,7 +8,8 @@ use base64::{encode, decode};
 use core::panic;
 use std::io::{Write, Read};
 use std::fs::{File};
-use rand::Rng;
+use rand::{Rng, thread_rng};
+use std::cmp::min;
 
 pub struct Key {
     pub n: u64,
@@ -188,7 +189,6 @@ impl KeyPair {
     }
 
     fn calc_exponents(&self, k: &u32) -> (u64, u64, u64, u64) {
-        //print!("Calculating Exponents of KeyPair...");
         let e: u64 = self.rand_e();
         let (p, q) = self.rand_pq(*k, e);
         let n: u64 = q * p; 
@@ -201,7 +201,7 @@ impl KeyPair {
 
 
     fn ext_gcd(&self, a: u64, b: u64) -> u64 {
-        let (mut a, mut b) = (i128::try_from(a).unwrap(), i128::try_from(b).unwrap());
+        let (mut a, mut b) = (a.try_into().unwrap(), b.try_into().unwrap());
         let mut x: [i128; 2] = [0, 1];
         let mut y: [i128; 2] = [1, 0];
         let mut q: i128;
@@ -225,22 +225,21 @@ impl KeyPair {
         if k > 32 {
             panic!("Key Bit-Length is too long, must be <=32")
         }
-        k = k/2;
-        let max: u64 = u64::try_from(2_u128.pow(k) - 1).unwrap();
+        k = k>>1;
+        let max: u64 = (2_u128.pow(k) - 1).try_into().unwrap();
         let min: u64 = (max >> 1)^max;
+        let shift_b: u32 = k - 1;
         let mut p: [u64;2] = [0,0];
     
         for n in 0..2{
             p[n] = rand::thread_rng().gen_range(min..max);
+            p[n] |= (min >> (shift_b))^min;
             loop {
                 if !self.is_prime(p[n]) {
-                    if p[n] & 1 == 0 {
-                        p[n]+=1;
-                        continue;
-                    }
                     p[n]+=2;
                     continue;
                 }
+
                 if p[n] % e != 1 {
                     break;
                 }
@@ -249,22 +248,76 @@ impl KeyPair {
         } 
         (p[0], p[1])
     }
-    
-    fn is_prime(&self, n:u64) -> bool {
-        if n == 2 || n == 3 {
-            return true;
+
+    fn is_prime(&self, u: u64) -> bool {
+        let u: usize = u.try_into().unwrap();
+        let n: i64 = u.try_into().unwrap();
+        let k: i64 = 7;
+        let mut s: i64;
+        let mut d: i64;
+        let mut x: i64;
+        let mut prime: bool;
+
+        println!("n: {}", n);
+        if n < 6 {
+            return [false, false, true, true, false, true] [u];
         }
-        if n <= 1 || n % 2 == 0 || n % 3 == 0 {
-            return false;  
+
+        if n & 1 == 0 {
+            return false
         }
-        let mut i = 5;
-        while  i*i <=n {
-            if n % i == 0 || n % (i + 2) == 0 {
-                return false;
+
+        (s, d) = (0, n - 1);
+        while d & 1 == 0 {
+            (s, d) = (s + 1, d >> 1);
+        }
+        
+        for _ in 0..min(n-4, k) {
+            let a = thread_rng().gen_range(2..min(n - 2, i64::MAX));
+            println!("\na:{} d: {}", a, d);
+            x = self.mod_pow(a, d, n);
+            
+            if x == 1 && x == n - 1{
+                continue;
+            
             }
-            i = i+6;
+            
+            prime = false;
+
+            for _ in 1..s {
+                x  = x * x % n;
+                if x == 1 {
+                    return false;
+                }
+
+                if x == n-1 {
+                    prime = true;
+                    break;
+                }
+            }
+            if !prime {
+                return false;
+            }   
         }
         return true;
+    }
+
+    fn mod_pow(&self, mut b: i64, mut e: i64,  m: i64) -> i64 {
+        let mut res: i64;
+        if m == 1 {
+            return 0;
+        }
+
+        res = 1;
+        b = b % m;
+        while e > 0 {
+            if e % 2 == 1 {
+                res = (res*b) % m;
+            }
+            b = (b*b) % m;
+            e = e >> 1;
+        }
+        res
     }
 
     fn rand_e(&self) -> u64 {
