@@ -3,8 +3,7 @@ use crate::keys::{KeyPair, Key};
 use std::io::{self, Write, BufRead};
 
 fn main() {
-    let pair = KeyPair::new().generate(&32);
-    
+    let pair = KeyPair::new(&32);
     // Test number below 3233
     let mut hex: u64 = 0x00000C9F;
     print!("Num Test 1: {:X} -> ", hex);
