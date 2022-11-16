@@ -230,21 +230,27 @@ impl KeyPair {
         let min: u64 = (max >> 1)^max;
         let shift_b: u32 = k - 1;
         let mut p: [u64;2] = [0,0];
+        let mut n: u64;
+        let mut prime: bool;
     
-        for n in 0..2{
-            p[n] = rand::thread_rng().gen_range(min..max);
-            p[n] |= (min >> (shift_b))^min;
-            loop {
-                if !self.is_prime(p[n]) {
-                    p[n]+=2;
+        for i in 0..2 {
+            n = rand::thread_rng().gen_range(min..max);
+            n|= (min >> (shift_b))^min;
+            prime = false;
+
+            for n in (n..max).step_by(2) {
+                print!("{}\n", n);
+                if !self.is_prime(n) {
                     continue;
                 }
 
-                if p[n] % e != 1 {
+                if n % e != 1 {
+                    p[i] = n;
+                    prime = true;
                     break;
                 }
-                p[n]+=2;
-            }  
+            }
+            if !prime {panic!("Can't find P or Q with specificed key length!!!")}
         } 
         (p[0], p[1])
     }
