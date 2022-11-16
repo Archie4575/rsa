@@ -240,9 +240,10 @@ impl KeyPair {
                     continue;
                 }
 
-                if p[n] % e == 1 {
-                    p[n]+=2;
+                if p[n] % e != 1 {
+                    break;
                 }
+                p[n]+=2;
             }  
         } 
         (p[0], p[1])
