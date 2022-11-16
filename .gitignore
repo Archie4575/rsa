@@ -1,1 +1,5 @@
 /target
+*.pem
+*.pem.pub
+src/*.pem
+src/*.pem.pub
