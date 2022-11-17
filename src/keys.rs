@@ -219,6 +219,7 @@ impl KeyPair {
             } 
             (p[0], p[1])
         }
+        
         let e: u64 = *[3_u64, 5_u64, 17_u64, 257_u64, 65537_u64].choose(&mut thread_rng()).unwrap();
         let (p, q) = rand_pq(*k, &e);
         let n: u64 = q * p; 
