@@ -10,7 +10,7 @@ use core::panic;
 use std::io::{Write, Read};
 use std::fs::{File};
 use rand::{Rng, thread_rng, prelude::SliceRandom};
-use crate::mathlib::{ext_gcd, is_prime};
+use crate::mathlib::{ext_gcd, is_prime, gen_rand_odd};
 
 
 
@@ -184,23 +184,22 @@ impl KeyPair {
     pub fn new (k: &u32) -> Self {    
 
         fn rand_pq(mut k: u32, e: &u64) -> (u64, u64) {
-            if k > 32 {
-                panic!("Key Bit-Length is too long, must be <=32")
-            }
+            // if k > 32 {
+            //     panic!("Key Bit-Length is too long, must be <=32")
+            // }
             if k < 22 {
                 println!("\nWARNING!!! Key may be too small. Recommended to increase Key Bit-Length above 21")
             }
+            let max: u64 = u64::MAX >> u64::try_from(k).unwrap();
             k = k>>1;
-            let max: u64 = (2_u128.pow(k) - 1).try_into().unwrap();
-            let min: u64 = (max >> 1)^max;
-            let shift_b: u32 = k - 1;
-            let mut rng = thread_rng(); 
             let mut p: [u64;2] = [0,0];
             let mut n: u64;
             let mut i: usize = 0;
+            
             while  i < 2 {
-                n = rng.gen_range(min..max);
-                n|= (min >> (shift_b))^min;
+                println!("AGAIN\n");
+                print!("max: {max}\n");
+                n = gen_rand_odd(k);
     
                 loop {
                     n+=2;
@@ -221,7 +220,7 @@ impl KeyPair {
             } 
             (p[0], p[1])
         }
-        
+        gen_rand_odd(16);
         let e: u64 = *[3_u64, 5_u64, 17_u64, 257_u64, 65537_u64].choose(&mut thread_rng()).unwrap();
         let (p, q) = rand_pq(*k, &e);
         let n: u64 = q * p; 
