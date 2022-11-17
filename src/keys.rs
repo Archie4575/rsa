@@ -199,6 +199,10 @@ impl KeyPair {
             
             while  i < 2 {
                 n = gen_rand_odd(k);
+
+                if n == p[0] {
+                    continue;
+                }
     
                 loop {
                     n+=2;

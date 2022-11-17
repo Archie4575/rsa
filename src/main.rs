@@ -5,6 +5,7 @@ use std::io::{self, Write, BufRead};
 
 
 fn main() {
+
     let pair = KeyPair::new(&32);
     // Test number below 3233
     let mut hex: u64 = 0x00000C9F;
@@ -19,7 +20,7 @@ fn main() {
     print!("{:X}    FAIL\n\n", pair.skey.encrypt64(pair.pkey.encrypt64(hex)));
 
     // Write keys to file
-    pair.pkey.write_to_file("rsa.pem.pub");
+    pair.pkey.write_to_file("rsa.pub");
     pair.skey.write_to_file("rsa.pem");
     println!("Saved keys to disk.\n");
 
