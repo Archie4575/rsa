@@ -184,9 +184,9 @@ impl KeyPair {
     pub fn new (k: &u32) -> Self {    
 
         fn rand_pq(mut k: u32, e: &u64) -> (u64, u64) {
-            // if k > 32 {
-            //     panic!("Key Bit-Length is too long, must be <=32")
-            // }
+            if k > 32 {
+                panic!("Key Bit-Length is too long, must be <=32")
+            }
             if k < 22 {
                 println!("\nWARNING!!! Key may be too small. Recommended to increase Key Bit-Length above 21")
             }
