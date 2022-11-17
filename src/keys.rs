@@ -190,8 +190,9 @@ impl KeyPair {
             if k < 22 {
                 println!("\nWARNING!!! Key may be too small. Recommended to increase Key Bit-Length above 21")
             }
-            let max: u64 = u64::MAX >> u64::try_from(k).unwrap();
+
             k = k>>1;
+            let max: u64 = u64::MAX >> u64::try_from(k).unwrap();
             let mut p: [u64;2] = [0,0];
             let mut n: u64;
             let mut i: usize = 0;
