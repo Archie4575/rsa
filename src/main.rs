@@ -1,5 +1,5 @@
 pub mod keys;
-pub mod keys_math;
+pub mod mathlib;
 use crate::keys::{KeyPair, Key};
 use std::io::{self, Write, BufRead};
 

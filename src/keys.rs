@@ -10,7 +10,7 @@ use core::panic;
 use std::io::{Write, Read};
 use std::fs::{File};
 use rand::{Rng, thread_rng, prelude::SliceRandom};
-use crate::keys_math::{ext_gcd, is_prime};
+use crate::mathlib::{ext_gcd, is_prime};
 
 
 
