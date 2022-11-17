@@ -9,7 +9,7 @@ use base64::{encode, decode};
 use core::panic;
 use std::io::{Write, Read};
 use std::fs::{File};
-use rand::{Rng, thread_rng, prelude::SliceRandom};
+use rand::{thread_rng, prelude::SliceRandom};
 use crate::mathlib::{ext_gcd, is_prime, gen_rand_odd};
 
 
@@ -197,8 +197,6 @@ impl KeyPair {
             let mut i: usize = 0;
             
             while  i < 2 {
-                println!("AGAIN\n");
-                print!("max: {max}\n");
                 n = gen_rand_odd(k);
     
                 loop {
@@ -220,7 +218,6 @@ impl KeyPair {
             } 
             (p[0], p[1])
         }
-        gen_rand_odd(16);
         let e: u64 = *[3_u64, 5_u64, 17_u64, 257_u64, 65537_u64].choose(&mut thread_rng()).unwrap();
         let (p, q) = rand_pq(*k, &e);
         let n: u64 = q * p; 
