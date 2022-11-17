@@ -187,6 +187,9 @@ impl KeyPair {
             if k > 32 {
                 panic!("Key Bit-Length is too long, must be <=32")
             }
+            if k < 22 {
+                println!("\nWARNING!!! Key may be too small. Recommended to increase Key Bit-Length above 21")
+            }
             k = k>>1;
             let max: u64 = (2_u128.pow(k) - 1).try_into().unwrap();
             let min: u64 = (max >> 1)^max;
