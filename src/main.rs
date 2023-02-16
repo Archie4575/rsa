@@ -1,17 +1,21 @@
-pub mod keys;
-pub mod mathlib;
+// pub mod keys;
+// pub mod mathlib;
+// pub mod threading;
+// pub mod connection;
 pub mod threading;
-pub mod connection;
+mod Threading; 
 
-use crate::keys::{KeyPair};
-use crate::threading::{Threads};
 
-use std::io::{self, Write, BufRead};
+// use crate::keys::{KeyPair};
+use crate::threading::CacheJob;
 
+// use std::io::{self, Write, BufRead};
 
 fn main() {
-    let threads = Threads::new();
-    threads.connections();
+    let threads = CacheJob::new();
+    threads.start();
+
+    print!("ds");
     // let pair = KeyPair::new(&32);
     // // Test number below 3233
     // let mut hex: u64 = 0x00000C9F;
